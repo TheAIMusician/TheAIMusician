@@ -33,7 +33,7 @@
             touch-action: none;
         }
 
-        /* 배경 레이어 (기본 opacity 1.0으로 수정) */
+        /* 배경 레이어 */
         #bg-container {
             position: absolute;
             inset: 0;
@@ -170,7 +170,7 @@
         }
 
         .controls { 
-            position: absolute; top: 140px; right: 40px; /* bottom: 40px 에서 점수판 아래인 top: 140px 로 위치 변경 */
+            position: absolute; top: 140px; right: 40px; 
             pointer-events: all; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; 
         }
 
@@ -879,7 +879,8 @@
                     const prog = Math.max(0, Math.min(1, (ct - n.startTime) / n.duration));
                     const curLaneIdx = Math.round(n.lane + (n.endLane - n.lane) * prog);
                     
-                    if (!isAutoPlay && !lanesActive[curLaneIdx]) { failNote(n, i); continue; }
+                    // 드래그 노트는 오토 플레이가 꺼져있어도 유지(Hold) 실패를 하지 않도록 예외 처리
+                    if (!isAutoPlay && n.type !== 'drag' && !lanesActive[curLaneIdx]) { failNote(n, i); continue; }
                     
                     if (n.type === 'long' && Date.now() - n.lastEffectTime > 75) { 
                         createHitEffect(n.lane, n.type, 0.7); 
@@ -893,13 +894,14 @@
                         processJudg('PERFECT', n, i); 
                     }
                 } else {
-                    if (isAutoPlay && td <= 0) { 
+                    // 드래그 노트는 오토 플레이 여부와 상관없이 무조건 자동 퍼펙트 시작 처리
+                    if ((isAutoPlay || n.type === 'drag') && td <= 0) { 
                         if (n.type === 'normal') { 
                             createHitEffect(n.lane, 'normal', 2.0); processJudg('PERFECT', n, i); 
                         } else { 
                             n.isHolding = true; n.el.classList.add('holding'); n.lastEffectTime = Date.now(); 
-                            processJudg('PERFECT', n, i, true); // 오토 모드 시작 지점 퍼펙트
-                            if(n.type === 'long') createHitEffect(n.lane, n.type, 2.0); 
+                            processJudg('PERFECT', n, i, true); // 오토 모드 시작 지점 퍼펙트 또는 드래그노트 자동 퍼펙트
+                            if(n.type === 'long' || n.type === 'drag') createHitEffect(n.lane, n.type, 2.0); 
                         } 
                         continue; 
                     }
