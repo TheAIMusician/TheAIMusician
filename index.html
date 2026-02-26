@@ -21,7 +21,7 @@
         }
 
         body {
-            background-color: #000; /* 레터박스 영역 색상 */
+            background-color: #020205;
             color: #e2e8f0;
             font-family: 'Rajdhani', sans-serif;
             margin: 0;
@@ -30,32 +30,17 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            width: 100vw;
             touch-action: none;
         }
 
-        /* 16:9 비율 고정 및 스케일링 컨테이너 */
-        #viewport {
-            width: calc(750px * 16 / 9); /* 1333.33px */
-            height: 750px;
-            position: relative;
-            background-color: #020205; /* 오리지널 배경 색상 */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform-origin: center center;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
-        }
-
-        /* 배경 레이어 (뷰포트 내부로 종속됨) */
+        /* 배경 레이어 (기본 opacity 1.0으로 수정) */
         #bg-container {
             position: absolute;
             inset: 0;
             background-size: cover;
             background-position: center;
             opacity: 1.0; 
-            z-index: 1;
+            z-index: -2;
             transition: background-image 0.5s ease, opacity 0.1s ease;
         }
         
@@ -68,7 +53,7 @@
             background-size: 50px 50px;
             transform: perspective(500px) rotateX(60deg);
             animation: grid-move 3s linear infinite;
-            z-index: 2;
+            z-index: -1;
         }
         @keyframes grid-move { from { background-position: 0 0; } to { background-position: 0 50px; } }
 
@@ -84,7 +69,6 @@
             border-right: 2px solid rgba(0, 243, 255, 0.3);
             box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
             overflow: hidden;
-            z-index: 10;
         }
 
         .lane-container {
@@ -323,13 +307,11 @@
 </head>
 <body>
 
-    <!-- 16:9 비율 고정 및 확대 축소를 위한 래퍼(Wrapper) -->
-    <div id="viewport">
-        <!-- 배경 및 이펙트는 모두 뷰포트 내부에 위치하여 비율을 유지합니다 -->
-        <div id="bg-container"></div>
-        <div id="bg-grid-overlay"></div>
-        <div id="lightning-flash"></div>
+    <div id="bg-container"></div>
+    <div id="bg-grid-overlay"></div>
+    <div id="lightning-flash"></div>
 
+    <div id="viewport">
         <div id="game-board">
             <div class="lane-container">
                 <div class="lane"><div class="lane-key">Q</div></div>
@@ -424,19 +406,6 @@
     </div>
 
     <script>
-        // 화면 크기에 맞춰 16:9 뷰포트를 확대/축소하는 반응형 함수
-        function resizeViewport() {
-            const viewport = document.getElementById('viewport');
-            const targetWidth = 750 * 16 / 9; // 1333.33px
-            const targetHeight = 750;
-            const scaleX = window.innerWidth / targetWidth;
-            const scaleY = window.innerHeight / targetHeight;
-            const scale = Math.min(scaleX, scaleY);
-            viewport.style.transform = `scale(${scale})`;
-        }
-        window.addEventListener('resize', resizeViewport);
-        resizeViewport(); // 초기 실행
-
         // 전역 상수 및 설정 (하드코딩된 파일 링크)
         const AUDIO_URL = "https://www.dropbox.com/scl/fi/16o4xykgg9k3khtq1sa45/QWER.ogg?rlkey=70op4h51zya3j7j1rp7m9emas&st=u8x1mcw2&dl=0";
         const MIDI_URL = "https://www.dropbox.com/scl/fi/cnasbm7c7t36u7rrmw5xr/QWER.mid?rlkey=h0b0k44qhwkmuxbaz41aj790k&st=lccw22jc&dl=0";
@@ -573,7 +542,7 @@
                     bolt.className = `lightning-bolt ${type}`; 
                     bolt.style.left = Math.random() * 100 + '%';
                     bolt.style.animation = 'bolt-strike 1.2s ease-out forwards'; 
-                    document.getElementById('viewport').appendChild(bolt); 
+                    document.body.appendChild(bolt); 
                     setTimeout(() => bolt.remove(), 1300);
                 }, i * 150); 
             });
